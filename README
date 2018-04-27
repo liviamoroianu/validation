@@ -1,0 +1,4 @@
+This is a library for validating business DTOs.
+It allows method chaining for specifying validations to perform on an object and failing
+at first error.
+Probably best fitted for application to application request validation.
