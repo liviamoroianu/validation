@@ -21,15 +21,15 @@ public class EmployeeWithProjectsValidator extends PersonValidatorImpl<Employee>
     @Override
     public ValidationChecks.ValidationChecksBuilder getAccumulator(Employee employee, String validationPath) {
         return super.getAccumulator(employee, validationPath)
-                .withValidations(validateProjects(employee.assignedProjects, validationPath));
+                .withValidations(validateProjects(employee.assignedProjects));
     }
 
-    private List<Validation> validateProjects(List<Project> projects, String validationPath) {
+    private List<Validation> validateProjects(List<Project> projects) {
         return projects.stream()
                 .map(project -> Validation.ValidationBuilder
                         .aValidation()
                         .withObject(project)
-                        .withCurrentPath(append(validationPath, "assignedProjects"))
+                        .withCurrentPath("assignedProjects")
                         .withValidator(projectValidator)
                         .build())
                 .collect(Collectors.toList());

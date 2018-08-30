@@ -28,7 +28,7 @@ public class EmployeeWithProjectsValidatorTest extends TestUtils {
     }
 
     @Test
-    public void employeeHavingUnknownProject() throws Exception {
+    public void employeeHavingUnknownProject() {
         Employee employeeWithProjects = anEmployeeDefaultBuilder().withAssignedProjects(someInvalidProjects()).build();
 
         ValidationChecks validator = this.validator.getAccumulator(employeeWithProjects, "employee").build();

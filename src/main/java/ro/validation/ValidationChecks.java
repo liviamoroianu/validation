@@ -1,5 +1,7 @@
 package ro.validation;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,8 +11,10 @@ import java.util.List;
 public class ValidationChecks {
 
     private List<Validation> validations;
+    private String path;
 
-    public ValidationChecks(List<Validation> validations) {
+    private ValidationChecks(String path, List<Validation> validations) {
+        this.path = path;
         this.validations = validations;
     }
 
@@ -25,10 +29,24 @@ public class ValidationChecks {
                 .map(validation -> validation.validate())
                 .filter(validationResult -> validationResult.hasErrors())
                 .findFirst()
+                .map(validationResult -> appendCurrentPathToErrorResult(validationResult))
                 .orElse(ValidationResult.valid());
     }
 
+    private ValidationResult appendCurrentPathToErrorResult(ValidationResult validationResult) {
+        return ValidationResult.anError(append(path, validationResult.getFieldPath()), validationResult.getErrorCode(), validationResult.getMessage());
+    }
+
+    private String append(String path, String fieldPath) {
+        if (StringUtils.isEmpty(path)) {
+            return fieldPath;
+        }
+
+        return path + "." + fieldPath;
+    }
+
     public static final class ValidationChecksBuilder {
+        private String path;
         private List<Validation> validations;
 
         private ValidationChecksBuilder() {
@@ -44,13 +62,18 @@ public class ValidationChecks {
             return this;
         }
 
+        public ValidationChecksBuilder withPath(String path) {
+            this.path = path;
+            return this;
+        }
+
         public ValidationChecksBuilder withValidation(Validation validation) {
             this.validations.add(validation);
             return this;
         }
 
         public ValidationChecks build() {
-            return new ValidationChecks(validations);
+            return new ValidationChecks(path, validations);
         }
     }
 }

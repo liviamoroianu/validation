@@ -5,7 +5,7 @@ import ro.validation.ValidationChecks.ValidationChecksBuilder;
 /**
  * This is the base implementation for a business dto validator.
  * It accumulates errors in the an object of type ValidationChecksBuilder
- * A custom validator should implement this class and add validations to be checked
+ * A customd validator should implement this class and add validations to be checked
  *
  * @param <T>
  */
@@ -22,15 +22,13 @@ public abstract class DtoValidator<T> {
     }
 
     /**
-     * initialize an accumulator for a dto
+     * to be implemented in validators in order to initialize an accumulator for a dto
      *
      * @param dto
      * @param validationPath used for keeping the append of current validated object inside a hierarchy of dto objects
      * @return
      */
-    protected ValidationChecks.ValidationChecksBuilder getAccumulator(T dto, String validationPath) {
-        return ValidationChecksBuilder.aValidationChecks();
-    }
+    public abstract ValidationChecks.ValidationChecksBuilder getAccumulator(T dto, String validationPath);
 
     /**
      * initialize an accumulator for a dto and add a validation check to it
@@ -38,7 +36,7 @@ public abstract class DtoValidator<T> {
      * @param validation
      * @return
      */
-    protected ValidationChecksBuilder getAccumulator(Validation validation) {
+    public ValidationChecksBuilder getAccumulator(Validation validation) {
         return ValidationChecksBuilder
                 .aValidationChecks()
                 .withValidation(validation);
@@ -52,16 +50,5 @@ public abstract class DtoValidator<T> {
      */
     public String getDtoPathIdentifier(T dto) {
         return null;
-    }
-
-    /**
-     * utility for appending a field name to current validation path
-     *
-     * @param validationPath
-     * @param fieldName
-     * @return
-     */
-    protected String append(String validationPath, String fieldName) {
-        return validationPath + "." + fieldName;
     }
 }

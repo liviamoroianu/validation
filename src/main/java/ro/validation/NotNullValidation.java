@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class NotNullValidation extends Validation {
 
-    public NotNullValidation(Object object, String currentPath, Validator validatorCall) {
+    public NotNullValidation(Object object, String currentPath) {
         super(object, currentPath, (Validator<Object>) obj -> {
             if (nullOrEmpty(obj)) {
                 return ValidationResult.anError(currentPath, "MISSING", "Missing field");

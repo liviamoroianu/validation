@@ -41,6 +41,14 @@ public class Validation<T> {
         this.validatorCall = validatorCall;
     }
 
+    public Validation(T object, String currentPath, DtoValidator validator, Validator<T> validatorCall) {
+        this.object = object;
+        this.currentPath = currentPath;
+        this.validator = validator;
+        this.validatorCall = validatorCall;
+    }
+
+
     private String getPath(String currentPath, String fieldName) {
         if (fieldName == null) {
             return currentPath;
@@ -99,10 +107,10 @@ public class Validation<T> {
         }
 
         public Validation build() {
-            if (validator == null) {
+            if (validator == null && callableValidator == null) {
                 throw new IllegalArgumentException("Bad validation configuration");
             }
-            Validation validation = new Validation(object, currentPath, validator);
+            Validation validation = new Validation(object, currentPath, validator, callableValidator);
             return validation;
         }
 
