@@ -1,6 +1,6 @@
 package ro.validation;
 
-import static ro.validation.NotNullValidation.notNull;
+import static ro.validation.Validation.notNull;
 
 public abstract class PersonValidatorImpl<T extends Person> extends DtoValidator<T> {
 
@@ -16,17 +16,22 @@ public abstract class PersonValidatorImpl<T extends Person> extends DtoValidator
                 .withValidation(isValidAge(dto));
     }
 
-    private Validation isValidAge(T dto) {
-        return Validation.ValidationBuilder
+    private Validation<T> isValidAge(T dto) {
+        /*return Validation.ValidationBuilder
                 .aValidation()
                 .withObject(dto)
                 .withCurrentPath("age")
-                .withValidatorCall((Validator<T>) person -> {
+                .withConditionOrElse((Validator<T>) person -> {
                     if (person.getAge() <= 0) {
                         return ValidationResult.anError("age", "invalid age", "age should be a positive number");
                     }
                     return ValidationResult.valid();
                 })
+                .build();*/
+        return new Validation.ValidationBuilder<T>()
+                .withObject(dto)
+                .withCurrentPath("age")
+                .withConditionOrElse((person) -> person.getAge() <= 0, "invalid age", "age should be a positive number")
                 .build();
     }
 

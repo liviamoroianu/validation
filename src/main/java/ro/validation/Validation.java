@@ -3,6 +3,8 @@ package ro.validation;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * A class used to store a validation check to be performed on a dto in the form of an explicit validator
@@ -15,39 +17,41 @@ public class Validation<T> {
     /**
      * Validate through a custom validator call
      */
-    private DtoValidator validator;
+    private DtoValidator<T> validator;
     /**
      * Object to be validated
      */
     protected T object;
     /**
-     * Current path in the validation result three
+     * Current path in the validation result tree
      */
     protected String currentPath;
+
     /**
-     * A callable function for simpler validations
+     * An errorPredicate which if not evaluated to true will return a validation result with the error code and message provided
      */
-    protected Validator<T> validatorCall;
+    protected Predicate<T> errorPredicate;
 
-    public Validation(T object, String currentPath, DtoValidator validator) {
+    /**
+     * The error code returned in the validation result if the errorPredicate evaluates to true
+     */
+    private String errorCode;
+
+    /**
+     * The error message returned in the validation result if the errorPredicate evaluates to true
+     */
+    private String errorMessage;
+
+    public Validation(T object, String currentPath) {
+        this.object = object;
+        this.currentPath = currentPath;
+    }
+
+    public Validation(T object, String currentPath, DtoValidator<T> validator) {
         this.object = object;
         this.currentPath = currentPath;
         this.validator = validator;
     }
-
-    public Validation(T object, String currentPath, Validator<T> validatorCall) {
-        this.object = object;
-        this.currentPath = currentPath;
-        this.validatorCall = validatorCall;
-    }
-
-    public Validation(T object, String currentPath, DtoValidator validator, Validator<T> validatorCall) {
-        this.object = object;
-        this.currentPath = currentPath;
-        this.validator = validator;
-        this.validatorCall = validatorCall;
-    }
-
 
     private String getPath(String currentPath, String fieldName) {
         if (fieldName == null) {
@@ -61,8 +65,10 @@ public class Validation<T> {
         if (validator != null) {
             return callValidator();
         }
-        if (validatorCall != null) {
-            return validatorCall.validate(object);
+        if (errorPredicate != null) {
+            if (errorPredicate.test(object)) {
+                return ValidationResult.anError(currentPath, errorCode, errorMessage);
+            }
         }
         return ValidationResult.valid();
     }
@@ -73,44 +79,77 @@ public class Validation<T> {
                 .build().validate();
     }
 
-    public static final class ValidationBuilder<T> {
-        protected T object;
+    public static Validation notNull(Object object, String currentPath) {
+        return new ValidationBuilder<>()
+                .withObject(object)
+                .withCurrentPath(currentPath)
+                .withConditionOrElse((obj) -> nullOrEmpty(object), "MISSING", "Missing field")
+                .build();
+    }
+
+    private static boolean nullOrEmpty(Object object) {
+        if (object == null) {
+            return true;
+        }
+        if (object instanceof String && ((String) object).
+                isEmpty()) {
+            return true;
+        }
+        if (object instanceof List && ((List) object).
+                isEmpty()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static final class ValidationBuilder<S> {
+        protected S object;
         private String currentPath;
-        private DtoValidator validator;
-        private Validator<T> callableValidator;
+        private DtoValidator<S> validator;
+        private Predicate<S> predicate;
+        private String errorCode;
+        private String errorMessage;
 
-        private ValidationBuilder() {
+        public ValidationBuilder() {
         }
 
-        public static ValidationBuilder aValidation() {
-            return new ValidationBuilder();
-        }
-
-        public ValidationBuilder withValidator(DtoValidator validator) {
+        public ValidationBuilder<S> withValidator(DtoValidator<S> validator) {
             this.validator = validator;
             return this;
         }
 
-        public ValidationBuilder withValidatorCall(Validator<T> callableValidator) {
-            this.callableValidator = callableValidator;
+        public ValidationBuilder<S> withConditionOrElse(Predicate<S> predicate, String errorCode, String errorMessage) {
+            this.predicate = predicate;
+            this.errorCode = errorCode;
+            this.errorMessage = errorMessage;
             return this;
         }
 
-        public ValidationBuilder withObject(T object) {
+        public ValidationBuilder<S> withObject(S object) {
             this.object = object;
             return this;
         }
 
-        public ValidationBuilder withCurrentPath(String path) {
+        public ValidationBuilder<S> withCurrentPath(String path) {
             this.currentPath = path;
             return this;
         }
 
-        public Validation build() {
-            if (validator == null && callableValidator == null) {
+        public Validation<S> build() {
+            if (validator == null && predicate == null) {
                 throw new IllegalArgumentException("Bad validation configuration");
             }
-            Validation validation = new Validation(object, currentPath, validator, callableValidator);
+
+            if (predicate != null && (StringUtils.isEmpty(errorCode) || StringUtils.isEmpty(errorMessage))) {
+                throw new IllegalArgumentException("Bad validation configuration");
+            }
+
+            Validation<S> validation = new Validation<S>(object, currentPath);
+            validation.errorPredicate = predicate;
+            validation.validator = validator;
+            validation.errorCode = errorCode;
+            validation.errorMessage = errorMessage;
             return validation;
         }
 

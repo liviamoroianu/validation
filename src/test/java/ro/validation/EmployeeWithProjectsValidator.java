@@ -26,8 +26,7 @@ public class EmployeeWithProjectsValidator extends PersonValidatorImpl<Employee>
 
     private List<Validation> validateProjects(List<Project> projects) {
         return projects.stream()
-                .map(project -> Validation.ValidationBuilder
-                        .aValidation()
+                .map(project -> new Validation.ValidationBuilder<Project>()
                         .withObject(project)
                         .withCurrentPath("assignedProjects")
                         .withValidator(projectValidator)

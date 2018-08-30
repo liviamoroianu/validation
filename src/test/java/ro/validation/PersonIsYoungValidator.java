@@ -10,17 +10,14 @@ public class PersonIsYoungValidator extends PersonValidatorImpl<Person> {
     @Override
     public ValidationChecks.ValidationChecksBuilder getAccumulator(Person person, String validationPath) {
         return super.getAccumulator(person, validationPath)
-                .withValidation(personIsYoung(person, validationPath));
+                .withValidation(personIsYoung(person));
     }
 
-    private Validation personIsYoung(Person person, String validationPath) {
-        return new Validation(person, validationPath, (Validator<Person>) object -> {
-            if (!isYoung(person)) {
-                return ValidationResult.anError(validationPath, "PERSON_AGE", "Person is old");
-            }
-            return ValidationResult.valid();
-
-        });
+    private Validation personIsYoung(Person person) {
+        return new Validation.ValidationBuilder<Person>()
+                .withObject(person)
+                .withConditionOrElse(pers -> !isYoung(pers), "PERSON_AGE", "Person is old")
+                .build();
     }
 
     private boolean isYoung(Person person) {

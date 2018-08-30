@@ -2,7 +2,7 @@ package ro.validation;
 
 import java.util.Objects;
 
-import static ro.validation.NotNullValidation.notNull;
+import static ro.validation.Validation.notNull;
 
 public class ProjectValidator extends DtoValidator<Project> {
 
