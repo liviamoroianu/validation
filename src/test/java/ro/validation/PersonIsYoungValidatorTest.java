@@ -2,7 +2,6 @@ package ro.validation;
 
 import org.junit.Before;
 import org.junit.Test;
-import ro.validation.ValidationChecks.ValidationChecksBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,8 +17,7 @@ public class PersonIsYoungValidatorTest extends TestUtils {
     @Test
     public void employeeHasNoAge() {
         Employee employeeWithNoAge = anEmployeeDefaultBuilder().withAge(null).build();
-        ValidationChecksBuilder checker = validator.getAccumulator(employeeWithNoAge, "employee");
-        ValidationResult validationResult = checker.build().validate();
+        ValidationResult validationResult = validator.validate(employeeWithNoAge, "employee");
 
         assertThat(validationResult.hasErrors()).isTrue();
         assertThat(validationResult.getFieldPath()).isEqualTo("employee.age");
@@ -30,8 +28,7 @@ public class PersonIsYoungValidatorTest extends TestUtils {
     @Test
     public void employeeHasInvalidAge() {
         Employee employeeWithNoAge = anEmployeeDefaultBuilder().withAge(-1).build();
-        ValidationChecksBuilder checker = validator.getAccumulator(employeeWithNoAge, "employee");
-        ValidationResult validationResult = checker.build().validate();
+        ValidationResult validationResult = validator.validate(employeeWithNoAge, "employee");
 
         assertThat(validationResult.hasErrors()).isTrue();
         assertThat(validationResult.getFieldPath()).isEqualTo("employee.age");
@@ -43,8 +40,7 @@ public class PersonIsYoungValidatorTest extends TestUtils {
     @Test
     public void employeeIsValid() {
         Employee employee = anEmployee();
-        ValidationChecksBuilder checker = validator.getAccumulator(employee, "");
-        ValidationResult validationResult = checker.build().validate();
+        ValidationResult validationResult = validator.validate(employee, "");
         assertThat(validationResult.hasErrors()).isFalse();
     }
 

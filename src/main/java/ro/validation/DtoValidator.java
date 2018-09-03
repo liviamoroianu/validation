@@ -2,6 +2,8 @@ package ro.validation;
 
 import ro.validation.ValidationChecks.ValidationChecksBuilder;
 
+import java.util.List;
+
 /**
  * This is the base implementation for a business dto validator.
  * It accumulates errors in the an object of type ValidationChecksBuilder
@@ -28,18 +30,15 @@ public abstract class DtoValidator<T> {
      * @param validationPath used for keeping the append of current validated object inside a hierarchy of dto objects
      * @return
      */
-    public abstract ValidationChecks.ValidationChecksBuilder getAccumulator(T dto, String validationPath);
+    protected abstract List<Validation> validations(T dto, String validationPath);
 
-    /**
-     * initialize an accumulator for a dto and add a validation check to it
-     *
-     * @param validation
-     * @return
-     */
-    public ValidationChecksBuilder getAccumulator(Validation validation) {
-        return ValidationChecksBuilder
-                .aValidationChecks()
-                .withValidation(validation);
+    public ValidationResult validate(T dto, String validationPath) {
+        List<Validation> validations = validations(dto, validationPath);
+        ValidationChecks validationChecks = ValidationChecksBuilder.aValidationChecks()
+                .withPath(validationPath)
+                .withValidations(validations)
+                .build();
+        return validationChecks.validate();
     }
 
     /**

@@ -31,8 +31,7 @@ public class EmployeeWithProjectsValidatorTest extends TestUtils {
     public void employeeHavingUnknownProject() {
         Employee employeeWithProjects = anEmployeeDefaultBuilder().withAssignedProjects(someInvalidProjects()).build();
 
-        ValidationChecks validator = this.validator.getAccumulator(employeeWithProjects, "employee").build();
-        ValidationResult validationResult = validator.validate();
+        ValidationResult validationResult = this.validator.validate(employeeWithProjects, "employee");
 
         assertThat(validationResult.hasErrors()).isTrue();
         assertThat(validationResult.getFieldPath()).isEqualTo("employee.assignedProjects.id");
@@ -50,8 +49,7 @@ public class EmployeeWithProjectsValidatorTest extends TestUtils {
     public void employeeHavingProjectWithNoPriority() throws Exception {
         Employee employeeWithProjects = anEmployeeDefaultBuilder().withAssignedProjects(projectWithNoPriority()).build();
 
-        ValidationChecks validator = this.validator.getAccumulator(employeeWithProjects, "employee").build();
-        ValidationResult validationResult = validator.validate();
+        ValidationResult validationResult = this.validator.validate(employeeWithProjects, "employee");
 
         assertThat(validationResult.hasErrors()).isTrue();
         assertThat(validationResult.getFieldPath()).isEqualTo("employee.assignedProjects.2.priority");
@@ -70,8 +68,7 @@ public class EmployeeWithProjectsValidatorTest extends TestUtils {
     public void employeeWithProjectsIsValid() throws Exception {
         Employee employeeWithProjects = anEmployee();
 
-        ValidationChecks validator = this.validator.getAccumulator(employeeWithProjects, "employee").build();
-        ValidationResult validationResult = validator.validate();
+        ValidationResult validationResult = this.validator.validate(employeeWithProjects, "employee");
 
         assertThat(validationResult.hasErrors()).isFalse();
     }

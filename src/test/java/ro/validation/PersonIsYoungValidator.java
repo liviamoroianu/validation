@@ -1,5 +1,7 @@
 package ro.validation;
 
+import java.util.List;
+
 public class PersonIsYoungValidator extends PersonValidatorImpl<Person> {
 
     @Override
@@ -8,15 +10,16 @@ public class PersonIsYoungValidator extends PersonValidatorImpl<Person> {
     }
 
     @Override
-    public ValidationChecks.ValidationChecksBuilder getAccumulator(Person person, String validationPath) {
-        return super.getAccumulator(person, validationPath)
-                .withValidation(personIsYoung(person));
+    public List<Validation> validations(Person person, String validationPath) {
+        List<Validation> validations = super.validations(person, validationPath);
+        validations.add(personIsYoung(person));
+        return validations;
     }
 
     private Validation personIsYoung(Person person) {
         return new Validation.ValidationBuilder<Person>()
                 .withObject(person)
-                .withConditionOrElse(pers -> !isYoung(pers), "PERSON_AGE", "Person is old")
+                .withErrorOnConditions(pers -> !isYoung(pers), "PERSON_AGE", "Person is old")
                 .build();
     }
 

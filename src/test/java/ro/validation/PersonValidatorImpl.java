@@ -1,5 +1,9 @@
 package ro.validation;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static ro.validation.Validation.notNull;
 
 public abstract class PersonValidatorImpl<T extends Person> extends DtoValidator<T> {
@@ -9,11 +13,8 @@ public abstract class PersonValidatorImpl<T extends Person> extends DtoValidator
     }
 
     @Override
-    public ValidationChecks.ValidationChecksBuilder getAccumulator(T dto, String validationPath) {
-        return ValidationChecks.ValidationChecksBuilder.aValidationChecks()
-                .withPath(validationPath)
-                .withValidation(notNull(dto.getAge(), "age"))
-                .withValidation(isValidAge(dto));
+    public List<Validation> validations(T dto, String validationPath) {
+        return Stream.of(notNull(dto.getAge(), "age"), isValidAge(dto)).collect(Collectors.toList());
     }
 
     private Validation<T> isValidAge(T dto) {
@@ -21,7 +22,7 @@ public abstract class PersonValidatorImpl<T extends Person> extends DtoValidator
                 .aValidation()
                 .withObject(dto)
                 .withCurrentPath("age")
-                .withConditionOrElse((Validator<T>) person -> {
+                .withErrorOnConditions((Validator<T>) person -> {
                     if (person.getAge() <= 0) {
                         return ValidationResult.anError("age", "invalid age", "age should be a positive number");
                     }
@@ -31,7 +32,7 @@ public abstract class PersonValidatorImpl<T extends Person> extends DtoValidator
         return new Validation.ValidationBuilder<T>()
                 .withObject(dto)
                 .withCurrentPath("age")
-                .withConditionOrElse((person) -> person.getAge() <= 0, "invalid age", "age should be a positive number")
+                .withErrorOnConditions((person) -> person.getAge() <= 0, "invalid age", "age should be a positive number")
                 .build();
     }
 

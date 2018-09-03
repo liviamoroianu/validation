@@ -75,15 +75,14 @@ public class Validation<T> {
 
     private ValidationResult callValidator() {
         String fieldName = validator.getDtoPathIdentifier(object);
-        return validator.getAccumulator(object, getPath(currentPath, fieldName))
-                .build().validate();
+        return validator.validate(object, getPath(currentPath, fieldName));
     }
 
     public static Validation notNull(Object object, String currentPath) {
         return new ValidationBuilder<>()
                 .withObject(object)
                 .withCurrentPath(currentPath)
-                .withConditionOrElse((obj) -> nullOrEmpty(object), "MISSING", "Missing field")
+                .withErrorOnConditions((obj) -> nullOrEmpty(object), "MISSING", "Missing field")
                 .build();
     }
 
@@ -119,7 +118,7 @@ public class Validation<T> {
             return this;
         }
 
-        public ValidationBuilder<S> withConditionOrElse(Predicate<S> predicate, String errorCode, String errorMessage) {
+        public ValidationBuilder<S> withErrorOnConditions(Predicate<S> predicate, String errorCode, String errorMessage) {
             this.predicate = predicate;
             this.errorCode = errorCode;
             this.errorMessage = errorMessage;
